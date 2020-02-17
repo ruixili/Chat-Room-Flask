@@ -1,0 +1,163 @@
+<html>
+    <head>
+        <title>Chat Room: {{ room }}</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
+      	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+      	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+        <script type="text/javascript" charset="utf-8">
+          $(document).ready(function() {
+
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const invitation_token = urlParams.get('magic')
+            console.log(invitation_token);
+
+            var url = window.location.pathname;
+            var chat_id = url.substring(url.lastIndexOf('/') + 1);
+
+            if (invitation_token) {
+              console.log('redirect to login');
+
+              localStorage.setItem('chat_id', chat_id);
+              localStorage.setItem('invitation_token', invitation_token);
+              window.location.href = "/";
+            }
+
+            // sychronize messages per 30 seconds
+            function getMessage(chat_id) {
+      			  fetch(`${window.location.pathname}`, {
+      					method: "GET",
+      		      credentials: "include",
+      		      // cache: "no-cache",
+      		      headers: new Headers({
+        					contentType: "application/json; charset=utf-8"
+      		      })
+      			  }).then(function(response) {
+      					if (response.status !== 200) {
+      	          console.log(`Looks like there was a problem. Status code: ${response.status}`);
+      	          return;
+      	        }
+      	        response.json().then(function (response) {
+      	          console.log(response);
+
+                  var messages = response['messages'];
+
+                  var container = document.getElementById('container');
+                  while (container.firstChild) {
+                    container.removeChild(container.firstChild);
+                  }
+
+                  for (x in messages) {
+                    var perMessage = messages[x];
+                    var p = document.createElement('p');
+                    p.innerText = perMessage;
+                    container.append(p);
+                  }
+
+        					});
+        				});
+            }
+            var url = window.location.pathname;
+            var chat_id = url.substring(url.lastIndexOf('/') + 1);
+            setInterval(function() {
+               getMessage(chat_id);
+            }, 1000);
+
+            // var getMessageButton = document.getElementById('getMessageButton');
+            // getMessageButton.addEventListener('click', () => {getMessage(chat_id);}, false);
+
+
+            // send messages to backend
+            function sendMessage() {
+              var url = window.location.pathname;
+              var chat_id = url.substring(url.lastIndexOf('/') + 1);
+      				var message = document.getElementById("message");
+
+      				var entry = {
+                chat_id: chat_id,
+      					message: message.value
+      				}
+
+              // clear message in input
+              document.getElementById("message").value = '';
+
+      			  fetch(`${window.location.pathname}`, {
+      					method: "POST",
+      		      credentials: "include",
+      		      body: JSON.stringify(entry),
+      		      // cache: "no-cache",
+      		      headers: new Headers({
+      					contentType: "application/json; charset=utf-8"
+      		      })
+      			  }).then(function(response) {
+      					if (response.status !== 200) {
+      	          console.log(`Looks like there was a problem. Status code: ${response.status}`);
+      	          return;
+      	        }
+      	        response.json().then(function (response) {
+      	          console.log(response);
+                  // console.log(data);
+                  var container = document.getElementById('container');
+                  var p = document.createElement('p');
+                  p.innerText = response['message'];
+                  container.append(p);
+        					});
+        				});
+        			}
+        			var sendMessageButton = document.getElementById('sendMessageButton');
+        			sendMessageButton.addEventListener('click', sendMessage);
+
+              // create invitation link
+              function inviteFriend() {
+        				var entry = {
+                  chat_id: chat_id
+        				}
+
+        			  fetch(`${chat_id}/invite`, {
+        					method: "POST",
+        		      credentials: "include",
+        		      body: JSON.stringify(entry),
+        		      // cache: "no-cache",
+        		      headers: new Headers({
+        					contentType: "application/json; charset=utf-8"
+        		      })
+        			  }).then(function(response) {
+        					if (response.status !== 200) {
+        	          console.log(`Looks like there was a problem. Status code: ${response.status}`);
+        	          return;
+        	        }
+        	        response.json().then(function (response) {
+                    var magic_link = response['magic_link'];
+                    alert('Share this link to your friend: ' + magic_link);
+        					});
+        				});
+        			}
+        			var inviteButton = document.getElementById('inviteButton');
+        			inviteButton.addEventListener('click', inviteFriend);
+
+          		event.preventDefault();
+
+      	});
+        </script>
+
+    </head>
+    <body>
+        <h1>Chat Room: {{ room }}</h1>
+
+        <!-- <button type="button" id="getMessageButton">Get</button><br><br> -->
+
+      	<button type="button" id="inviteButton">Invite</button>
+
+        <div id="container"></div><br><br>
+
+        <div class="form-group">
+      		<label>Message</label>
+      		<input type="text" class="form-control" id="message" placeholder="Type message here...">
+      	</div>
+
+      	<button type="button" id="sendMessageButton">Send</button>
+
+    </body>
+</html>
