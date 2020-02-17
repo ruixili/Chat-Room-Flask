@@ -1,9 +1,8 @@
 # Chat-Room-Flask
-Course project for web development
 
-## Instructions
+## Description
 
-For this exercise, we will build a group chat web application with asynchronous
+I will build a group chat web application with asynchronous
 Javascript and a REST API written in Python with Flask.
 
 Watch Party lets users start new private chats that work like group texts or
@@ -13,11 +12,12 @@ authenticate the bearer to the chat. Users in a chat post messages which appear
 in a single conversation thread to all users. Unlike Slack or a group chat,
 Watch Party only saves or shows the last 30 messages.
 
-Implement the UI for Watch Party in HTML, CSS, and Javascript, and serve it
+Implemented the UI for Watch Party in HTML, CSS, and Javascript, and serveed it
 using server-side code written in the latest stable version of Python
 (3.8.1)
-and Flask. Be sure to
-include important features like:
+and Flask. 
+
+It has features like:
 
 
 - Prompt users to enter a username when they create or join a chat.
@@ -68,7 +68,5 @@ other methods you think will be useful, either as web controllers or as further
 API endpoints. You can use any other libraries or frameworks you find useful, as
 well.
 
-
-Remember to include in your submission any classmates you collaborated with and
-any materials you consulted. Watch Party (though it has somewhat different
+Watch Party (though it has somewhat different
 requirements) is inspired by yap.chat.
